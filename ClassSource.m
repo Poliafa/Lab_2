@@ -1,20 +1,20 @@
 classdef ClassSource < handle
-    properties (SetAccess = private) % Ïåðåìåííûå èç ïàðàìåòðîâ
-        % Êîëè÷åñòâî áèò â îäíîì êàäðå
+    properties (SetAccess = private) % ÐŸÐµÑ€ÐµÐ¼ÐµÐ½Ð½Ñ‹Ðµ Ð¸Ð· Ð¿Ð°Ñ€Ð°Ð¼ÐµÑ‚Ñ€Ð¾Ð²
+        % ÐšÐ¾Ð»Ð¸Ñ‡ÐµÑÑ‚Ð²Ð¾ Ð±Ð¸Ñ‚ Ð² Ð¾Ð´Ð½Ð¾Ð¼ ÐºÐ°Ð´Ñ€Ðµ
             NumBitsPerFrame;
-        % Ïåðåìåííàÿ óïðàâëåíèÿ ÿçûêîì âûâîäà èíôîðìàöèè äëÿ ïîëüçîâàòåëÿ
+        % ÐŸÐµÑ€ÐµÐ¼ÐµÐ½Ð½Ð°Ñ ÑƒÐ¿Ñ€Ð°Ð²Ð»ÐµÐ½Ð¸Ñ ÑÐ·Ñ‹ÐºÐ¾Ð¼ Ð²Ñ‹Ð²Ð¾Ð´Ð° Ð¸Ð½Ñ„Ð¾Ñ€Ð¼Ð°Ñ†Ð¸Ð¸ Ð´Ð»Ñ Ð¿Ð¾Ð»ÑŒÐ·Ð¾Ð²Ð°Ñ‚ÐµÐ»Ñ
             LogLanguage;
     end
-    properties (SetAccess = private) % Âû÷èñëÿåìûå ïåðåìåííûå
+    properties (SetAccess = private) % Ð’Ñ‹Ñ‡Ð¸ÑÐ»ÑÐµÐ¼Ñ‹Ðµ Ð¿ÐµÑ€ÐµÐ¼ÐµÐ½Ð½Ñ‹Ðµ
     end
     methods
         
-        function obj = ClassSource(Params, LogLanguage) % Êîíñòðóêòîð
-            % Âûäåëèì ïîëÿ Params, íåîáõîäèìûå äëÿ èíèöèàëèçàöèè
+        function obj = ClassSource(Params, LogLanguage) % ÐšÐ¾Ð½ÑÑ‚Ñ€ÑƒÐºÑ‚Ð¾Ñ€
+            % Ð’Ñ‹Ð´ÐµÐ»Ð¸Ð¼ Ð¿Ð¾Ð»Ñ Params, Ð½ÐµÐ¾Ð±Ñ…Ð¾Ð´Ð¸Ð¼Ñ‹Ðµ Ð´Ð»Ñ Ð¸Ð½Ð¸Ñ†Ð¸Ð°Ð»Ð¸Ð·Ð°Ñ†Ð¸Ð¸
                 Source  = Params.Source;
-            % Èíèöèàëèçàöèÿ çíà÷åíèé ïåðåìåííûõ èç ïàðàìåòðîâ
+            % Ð˜Ð½Ð¸Ñ†Ð¸Ð°Ð»Ð¸Ð·Ð°Ñ†Ð¸Ñ Ð·Ð½Ð°Ñ‡ÐµÐ½Ð¸Ð¹ Ð¿ÐµÑ€ÐµÐ¼ÐµÐ½Ð½Ñ‹Ñ… Ð¸Ð· Ð¿Ð°Ñ€Ð°Ð¼ÐµÑ‚Ñ€Ð¾Ð²
                 obj.NumBitsPerFrame = Source.NumBitsPerFrame;
-            % Ïåðåìåííàÿ LogLanguage
+            % ÐŸÐµÑ€ÐµÐ¼ÐµÐ½Ð½Ð°Ñ LogLanguage
                 obj.LogLanguage = LogLanguage;
         end
         function Bits = Step(obj)
