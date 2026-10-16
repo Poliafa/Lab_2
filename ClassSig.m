@@ -1,40 +1,36 @@
 classdef ClassSig < handle
-    properties (SetAccess = private) % Переменные из параметров
-        % Нужно ли выполнять формирование сигнала и выполнять его обработку
-        % при приёме
-            isTransparent;
-        % Переменная управления языком вывода информации для пользователя
-            LogLanguage;
-    end
-    properties (SetAccess = private) % Вычисляемые переменные
+    properties (SetAccess = private)
+        isTransparent;
+        LogLanguage;
+        RollOff;
+        FilterSpanInSymbols;
+        SamplesPerSymbol;
     end
     methods
-        function obj = ClassSig(Params, LogLanguage) % Конструктор
-            % Выделим поля Params, необходимые для инициализации
-                Sig  = Params.Sig;
-            % Инициализация значений переменных из параметров
-                obj.isTransparent = Sig.isTransparent;
-            % Переменная LogLanguage
-                obj.LogLanguage = LogLanguage;
+        function obj = ClassSig(Params, LogLanguage)
+            Sig = Params.Sig;
+            BBFrame = Params.BBFrame;
+            obj.isTransparent = Sig.isTransparent;
+            obj.LogLanguage = LogLanguage;
+            obj.RollOff = BBFrame.RollOff;
+            obj.FilterSpanInSymbols = 10;
+            obj.SamplesPerSymbol = 4;
         end
         function OutData = StepTx(obj, InData)
-            if obj.isTransparent
-                OutData = InData;
-                return
-            end
-            
-            % Здесь должна быть процедура формирования сигнала
-            OutData = InData;
+            if obj.isTransparent, OutData = InData; return; end
+            InData = InData(:);
+            h = rcosdesign(obj.RollOff, obj.FilterSpanInSymbols, obj.SamplesPerSymbol, 'sqrt');
+            OutData = upfirdn(InData, h, obj.SamplesPerSymbol, 1);
         end
         function OutData = StepRx(obj, InData)
-            if obj.isTransparent
-                OutData = InData;
-                return
-            end
-            
-            % Здесь должна быть процедура, обратная поцедуре формирования
-            % сигнала
-            OutData = InData;
+            if obj.isTransparent, OutData = InData; return; end
+            InData = InData(:);
+            h = rcosdesign(obj.RollOff, obj.FilterSpanInSymbols, obj.SamplesPerSymbol, 'sqrt');
+            Filtered = upfirdn(InData, h, 1, obj.SamplesPerSymbol);
+            Delay = obj.FilterSpanInSymbols;
+            Start = Delay + 1;
+            if Start > numel(Filtered), error('РќРµРґРѕСЃС‚Р°С‚РѕС‡РЅР°СЏ РґР»РёРЅР° СЃРёРіРЅР°Р»Р° РїРѕСЃР»Рµ RRC-С„РёР»СЊС‚СЂР°С†РёРё.'); end
+            OutData = Filtered(Start:end);
         end
     end
 end
