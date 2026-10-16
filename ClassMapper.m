@@ -189,8 +189,8 @@ classdef ClassMapper < handle
         % РАЗБИЕНИЕ НА СЛОТЫ И ВСТАВКА ПИЛОТОВ
         function PLFrame = InsertPilotsAndSlots(obj, XFECFrame)
             XFECFrame = XFECFrame(:);
-            fprintf('DEBUG: length(XFECFrame) = %d, mod 90 = %d\n', ...
-                length(XFECFrame), mod(length(XFECFrame), 90));
+           % fprintf('DEBUG: length(XFECFrame) = %d, mod 90 = %d\n', ...
+              %  length(XFECFrame), mod(length(XFECFrame), 90));
             S = length(XFECFrame) / 90;
             if mod(S, 1) ~= 0
                 error('Длина XFECFRAME должна быть кратна 90 (получено %d)', ...
