@@ -46,14 +46,13 @@
 % BCH + LDPC + Interleaver
 % 8PSK, Rate = 3/4
 % =====================================
+Source.NumBitsPerFrame = 1504*32;
 
-Source.NumBitsPerFrame = 1504 * 32;
-
-% BBFRAME
 BBFrame.isTransparent = false;
 BBFrame.RollOff = 0.35;
-BBFrame.DFL = 1504 * 32;
+BBFrame.DFL = 1504*32;
 BBFrame.K_bch = 48408;
+
 
 % BCH + LDPC
 Encoder.isTransparent = false;
@@ -71,7 +70,8 @@ Mapper.ModulationOrder = 8;
 Mapper.DecisionMethod = 'Approximate log-likelihood ratio';
 
 Mapper.HasPilots = true;% ДОБАВИЛА
+Sig.isTransparent = false;
 % Channel
-Channel.isTransparent = true;
+Channel.isTransparent = false;
 
 % End of Params
