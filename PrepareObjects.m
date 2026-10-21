@@ -1,22 +1,23 @@
-function [Objs, Ruler] = PrepareObjects(Params, ParamsNum, NumParams, ...
-    LogLanguage)
-% 
-% Функция инициализации объектов
+function [Objs, Ruler] = PrepareObjects(Params, ParamsNum, NumParams, LogLanguage)
+% РРЅРёС†РёР°Р»РёР·Р°С†РёСЏ РѕР±СЉРµРєС‚РѕРІ РјРѕРґРµР»Рё.
 
-    % Инициализация cell-массива для хранения объектов главного цилка
-        Objs = cell(Params.Common.NumWorkers, 1);
-        
-    % Цикл инициализации объектов главного цикла
-        for k = 1:Params.Common.NumWorkers
-            Objs{k}.Source = ClassSource(Params, LogLanguage);
-            Objs{k}.BBFrame  = ClassBBFrame(Params, LogLanguage);  
-            Objs{k}.Encoder = ClassEncoder(Params, LogLanguage);
-            Objs{k}.Interleaver = ClassInterleaver(Params, LogLanguage);
-            Objs{k}.Mapper = ClassMapper(Params, LogLanguage);
-            Objs{k}.Sig = ClassSig(Params, LogLanguage);
-            Objs{k}.Channel = ClassChannel(Params, Objs{k}, LogLanguage);
-            Objs{k}.Stat = ClassStat(LogLanguage);
-        end
-    
-    % Инициализация Ruler
-        Ruler = ClassBERRuler(Params, ParamsNum, NumParams, LogLanguage);
+    Objs = cell(Params.Common.NumWorkers, 1);
+
+    for k = 1:Params.Common.NumWorkers
+        Objs{k}.Source       = ClassSource(Params, LogLanguage);
+        Objs{k}.BBFrame      = ClassBBFrame(Params, LogLanguage);
+        Objs{k}.Encoder      = ClassEncoder(Params, LogLanguage);
+        Objs{k}.Interleaver  = ClassInterleaver(Params, LogLanguage);
+        Objs{k}.Mapper       = ClassMapper(Params, LogLanguage);
+
+        % Р§РµР»РѕРІРµРє 4: PL scrambling РІС‹РїРѕР»РЅСЏРµС‚СЃСЏ РїРѕСЃР»Рµ С„РѕСЂРјРёСЂРѕРІР°РЅРёСЏ PLFRAME
+        % (С‡РµР»РѕРІРµРє 3) Рё РґРѕ RRC-С„РёР»СЊС‚СЂР°С†РёРё.
+        Objs{k}.PLScrambler  = ClassPLScrambler(Params, LogLanguage);
+        Objs{k}.Sig           = ClassSig(Params, LogLanguage);
+
+        Objs{k}.Channel       = ClassChannel(Params, Objs{k}, LogLanguage);
+        Objs{k}.Stat          = ClassStat(LogLanguage);
+    end
+
+    Ruler = ClassBERRuler(Params, ParamsNum, NumParams, LogLanguage);
+end
