@@ -1,37 +1,40 @@
 classdef ClassStat < handle
     properties (SetAccess = private)
-        % Ïàðàìåòðû, èñïîëüçóåìûå äëÿ íàêîïëåíèÿ ñòàòèñòèêè
-            NumTrBits;   % êîëè÷åñòâî ïåðåäàííûõ áèò
-            NumTrFrames; % êîëè÷åñòâî ïåðåäàííûõ êàäðîâ
-            NumErBits;   % êîëè÷åñòâî îøèáî÷íûõ  áèò
-            NumErFrames; % êîëè÷åñòâî îøèáî÷íûõ  êàäðîâ
-        % Ïåðåìåííàÿ óïðàâëåíèÿ ÿçûêîì âûâîäà èíôîðìàöèè äëÿ ïîëüçîâàòåëÿ
+        % ÐŸÐ°Ñ€Ð°Ð¼ÐµÑ‚Ñ€Ñ‹, Ð¸ÑÐ¿Ð¾Ð»ÑŒÐ·ÑƒÐµÐ¼Ñ‹Ðµ Ð´Ð»Ñ Ð½Ð°ÐºÐ¾Ð¿Ð»ÐµÐ½Ð¸Ñ ÑÑ‚Ð°Ñ‚Ð¸ÑÑ‚Ð¸ÐºÐ¸
+            NumTrBits;   % ÐºÐ¾Ð»Ð¸Ñ‡ÐµÑÑ‚Ð²Ð¾ Ð¿ÐµÑ€ÐµÐ´Ð°Ð½Ð½Ñ‹Ñ… Ð±Ð¸Ñ‚
+            NumTrFrames; % ÐºÐ¾Ð»Ð¸Ñ‡ÐµÑÑ‚Ð²Ð¾ Ð¿ÐµÑ€ÐµÐ´Ð°Ð½Ð½Ñ‹Ñ… ÐºÐ°Ð´Ñ€Ð¾Ð²
+            NumErBits;   % ÐºÐ¾Ð»Ð¸Ñ‡ÐµÑÑ‚Ð²Ð¾ Ð¾ÑˆÐ¸Ð±Ð¾Ñ‡Ð½Ñ‹Ñ…  Ð±Ð¸Ñ‚
+            NumErFrames; % ÐºÐ¾Ð»Ð¸Ñ‡ÐµÑÑ‚Ð²Ð¾ Ð¾ÑˆÐ¸Ð±Ð¾Ñ‡Ð½Ñ‹Ñ…  ÐºÐ°Ð´Ñ€Ð¾Ð²
+        % ÐŸÐµÑ€ÐµÐ¼ÐµÐ½Ð½Ð°Ñ ÑƒÐ¿Ñ€Ð°Ð²Ð»ÐµÐ½Ð¸Ñ ÑÐ·Ñ‹ÐºÐ¾Ð¼ Ð²Ñ‹Ð²Ð¾Ð´Ð° Ð¸Ð½Ñ„Ð¾Ñ€Ð¼Ð°Ñ†Ð¸Ð¸ Ð´Ð»Ñ Ð¿Ð¾Ð»ÑŒÐ·Ð¾Ð²Ð°Ñ‚ÐµÐ»Ñ
             LogLanguage;
     end
     methods
-        function obj = ClassStat(LogLanguage) % Êîíñòðóêòîð
-            % Èíèöèàëèçàöèÿ çíà÷åíèé ïåðåìåííûõ ñòàòèñòèêè
-                obj.NumTrBits   = 0;
-                obj.NumTrFrames = 0;
-                obj.NumErBits   = 0;
-                obj.NumErFrames = 0;
-            % Ïåðåìåííàÿ LogLanguage
-                obj.LogLanguage = LogLanguage;
+        function obj = ClassStat(LogLanguage) % ÐšÐ¾Ð½ÑÑ‚Ñ€ÑƒÐºÑ‚Ð¾Ñ€
+            obj.NumTrBits   = 0;
+            obj.NumTrFrames = 0;
+            obj.NumErBits   = 0;
+            obj.NumErFrames = 0;
+            obj.LogLanguage = LogLanguage;
         end
         function Step(obj, Frame)
-            % Îáíîâëåíèå ñòàòèñòèêè
-                obj.NumTrBits   = obj.NumTrBits   + ...
-                    length(Frame.TxData);
-                obj.NumTrFrames = obj.NumTrFrames + 1;
-                Buf = sum(Frame.TxData ~= Frame.RxData);
-                obj.NumErBits   = obj.NumErBits   + Buf;
-                obj.NumErFrames = obj.NumErFrames + sign(Buf);
+            % ÐŸÑ€Ð¾Ð²ÐµÑ€ÐºÐ°: Ð´Ð»Ð¸Ð½Ñ‹ Ð´Ð¾Ð»Ð¶Ð½Ñ‹ ÑÐ¾Ð²Ð¿Ð°Ð´Ð°Ñ‚ÑŒ
+            if numel(Frame.TxData) ~= numel(Frame.RxData)
+                fprintf('!!! Ð”Ð›Ð˜ÐÐ« ÐÐ• Ð¡ÐžÐ’ÐŸÐÐ”ÐÐ®Ð¢: TxData=%d, RxData=%d\n', ...
+                    numel(Frame.TxData), numel(Frame.RxData));
+                return;   % Ð½Ðµ ÑÑ‡Ð¸Ñ‚Ð°ÐµÐ¼ ÑÑ‚Ð¾Ñ‚ ÐºÐ°Ð´Ñ€
+            end
+
+            obj.NumTrBits   = obj.NumTrBits   + numel(Frame.TxData);
+            obj.NumTrFrames = obj.NumTrFrames + 1;
+            Buf = sum(Frame.TxData ~= Frame.RxData);
+            obj.NumErBits   = obj.NumErBits   + Buf;
+            obj.NumErFrames = obj.NumErFrames + sign(Buf);
         end
         function Reset(obj)
             obj.NumTrBits   = 0;
             obj.NumTrFrames = 0;
             obj.NumErBits   = 0;
             obj.NumErFrames = 0;
-        end            
+        end
     end
 end
