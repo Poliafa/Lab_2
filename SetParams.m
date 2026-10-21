@@ -11,6 +11,8 @@ function Params = SetParams(inParams, ParamsNumber, LogLanguage)
             'Interleaver', ...
             'Mapper', ...
             'Sig', ...
+            'PLScrambler', ...
+            'RRCFilter', ...
             'Channel', ...
             'BER', ...
             'Common' ...
@@ -74,6 +76,61 @@ function BBFrame = SetParamsBBFrame(inBBFrame, ParamsNumber, LogLanguage)
         BBFrame.K_bch = 32208;   % rate 1/2
     end
 end
+
+function PLScrambler = SetParamsPLScrambler(inPLScrambler, ...
+    ParamsNumber, LogLanguage) %#ok<INUSD,DEFNU>
+% Parameters for Person 4: DVB-S2 physical-layer scrambling.
+    PLScrambler = inPLScrambler;
+    if ~isfield(PLScrambler,'isTransparent')
+        PLScrambler.isTransparent = true;
+    end
+    if ~isfield(PLScrambler,'ScramblingCodeIndex')
+        PLScrambler.ScramblingCodeIndex = 0;
+    end
+    if ~isfield(PLScrambler,'HeaderLength')
+        PLScrambler.HeaderLength = 90;
+    end
+    if ~isfield(PLScrambler,'MaxSequenceLength')
+        PLScrambler.MaxSequenceLength = 66420;
+    end
+    if PLScrambler.HeaderLength ~= 90
+        error('Для DVB-S2 PLHEADER должен содержать 90 символов.');
+    end
+    if PLScrambler.ScramblingCodeIndex < 0 || ...
+            PLScrambler.ScramblingCodeIndex ~= floor(PLScrambler.ScramblingCodeIndex)
+        error('Недопустимое значение PLScrambler.ScramblingCodeIndex.');
+    end
+end
+
+function RRCFilter = SetParamsRRCFilter(inRRCFilter, ...
+    ParamsNumber, LogLanguage) %#ok<INUSD,DEFNU>
+% Parameters for Person 4: root-raised-cosine filtering.
+    RRCFilter = inRRCFilter;
+    if ~isfield(RRCFilter,'isTransparent')
+        RRCFilter.isTransparent = true;
+    end
+    if ~isfield(RRCFilter,'RolloffFactor')
+        RRCFilter.RolloffFactor = 0.35;
+    end
+    if ~isfield(RRCFilter,'SamplesPerSymbol')
+        RRCFilter.SamplesPerSymbol = 4;
+    end
+    if ~isfield(RRCFilter,'FilterSpanInSymbols')
+        RRCFilter.FilterSpanInSymbols = 10;
+    end
+    if RRCFilter.RolloffFactor <= 0 || RRCFilter.RolloffFactor > 1
+        error('Недопустимое значение RRCFilter.RolloffFactor.');
+    end
+    if RRCFilter.SamplesPerSymbol < 1 || ...
+            RRCFilter.SamplesPerSymbol ~= floor(RRCFilter.SamplesPerSymbol)
+        error('SamplesPerSymbol должно быть положительным целым.');
+    end
+    if RRCFilter.FilterSpanInSymbols < 1 || ...
+            RRCFilter.FilterSpanInSymbols ~= floor(RRCFilter.FilterSpanInSymbols)
+        error('FilterSpanInSymbols должно быть положительным целым.');
+    end
+end
+
 function Encoder = SetParamsEncoder(inEncoder, ParamsNumber, ...
     LogLanguage) %#ok<INUSD,DEFNU>
 
@@ -478,3 +535,5 @@ function Common = SetParamsCommon(inCommon, ParamsNumber, ...
             % Проверка корректности введённых значений
         end
 end
+
+
