@@ -134,30 +134,33 @@ classdef ClassMapper < handle
         end
 
         function PLS = FormPLSCode(obj, b07)
-            % b07 - 7 бит: [b0, MODCOD(5), shortFlag, pilotsFlag]
-            % Порождающая матрица (32,7) из стандарта (см. plHeader.m)
-            genMat = [1 0 0 1 0 0 0 0 1 0 1 0 1 1 0 0 0 0 1 0 1 1 0 1 1 1 0 1 1 1 0 1;
-                0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1;
+            % b07 = [MODCOD(5), shortFlag, pilotsFlag] — 7 бит
+
+            % Порождающая матрица (32,6) со слайда 30
+            G = [0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1;
                 0 0 1 1 0 0 1 1 0 0 1 1 0 0 1 1 0 0 1 1 0 0 1 1 0 0 1 1 0 0 1 1;
                 0 0 0 0 1 1 1 1 0 0 0 0 1 1 1 1 0 0 0 0 1 1 1 1 0 0 0 0 1 1 1 1;
                 0 0 0 0 0 0 0 0 1 1 1 1 1 1 1 1 0 0 0 0 0 0 0 0 1 1 1 1 1 1 1 1;
                 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1;
                 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1];
 
-            n = mod(b07(1:7) * genMat, 2);       % берём только первые 7 бит
+            b6 = b07(1:6);
+            b7 = b07(7);
 
-            b64 = zeros(64, 1);
-            b64(1:2:end) = n;                    % чётные позиции = n
-            if b07(end)                          % pilots on
-                b64(2:2:end) = 1 - n;            % нечётные = инверсия
+            y = mod(b6 * G, 2);
+            y = y(:)';
+
+            if b7
+                PLS = [y, 1 - y];
             else
-                b64(2:2:end) = n;                % нечётные = n
+                PLS = [y, y];
             end
+            PLS = PLS(:);
 
-            % Скремблирование (64-битная последовательность из стандарта)
+            % Скремблирование (твоя последовательность правильная)
             scramSeq = [0 1 1 1 0 0 0 1 1 0 0 1 1 1 0 1 1 0 0 0 0 0 1 1 1 1 0 0 1 0 0 1 ...
                 0 1 0 1 0 0 1 1 0 1 0 0 0 0 1 0 0 0 1 0 1 1 0 1 1 1 1 1 1 0 1 0]';
-            PLS = xor(b64, scramSeq);
+            PLS = xor(PLS, scramSeq);
         end
 
         function PLHeader = FormPLHeader(obj)
@@ -165,13 +168,12 @@ classdef ClassMapper < handle
             SOF = [0 1 1 0 0 0 1 1 0 1 0 0 1 0 1 1 1 0 1 0 0 0 0 0 1 0]';
 
             % Формирование 7 бит b07
-            b0         = 0;                              % DVB-S2 (не S2X)
             MODCOD     = obj.GetMODCOD();
             modCodBits = int2bit(MODCOD, 5);
             modCodBits = modCodBits(:)';                 % гарантированно 1*5 (строка)
             shortFlag  = 0;                              % normal FECFRAME
             pilotsFlag = double(obj.HasPilots);
-            b07        = [b0, modCodBits, shortFlag, pilotsFlag];   % 1*7
+            b07        = [modCodBits, shortFlag, pilotsFlag];   % 1*7
 
             % PLS-код (64 бита)
             PLS = obj.FormPLSCode(b07);
