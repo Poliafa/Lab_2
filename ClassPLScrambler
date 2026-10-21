@@ -1,0 +1,105 @@
+classdef ClassPLScrambler < handle
+    properties (SetAccess = private)
+        % Parameters
+        isTransparent;
+        ScramblingCodeIndex;
+        HeaderLength;
+        MaxSequenceLength;
+        LogLanguage;
+    end
+    properties (SetAccess = private)
+        % Calculated values
+        GoldPeriod;
+        ScramblingSequence;
+    end
+    methods
+        function obj = ClassPLScrambler(Params, LogLanguage)
+            P = Params.PLScrambler;
+            obj.isTransparent = P.isTransparent;
+            obj.ScramblingCodeIndex = P.ScramblingCodeIndex;
+            obj.HeaderLength = P.HeaderLength;
+            obj.MaxSequenceLength = P.MaxSequenceLength;
+            obj.LogLanguage = LogLanguage;
+
+            obj.GoldPeriod = 2^18 - 1;
+            obj.ScramblingSequence = obj.MakeSequence(obj.MaxSequenceLength);
+        end
+
+        function OutData = StepTx(obj, InData)
+            if obj.isTransparent
+                OutData = InData;
+                return;
+            end
+
+            InData = InData(:);
+            OutData = InData;
+            first = min(obj.HeaderLength, length(InData));
+            N = length(InData) - first;
+            if N == 0
+                return;
+            end
+
+            C = obj.GetSequence(N);
+            OutData(first+1:end) = InData(first+1:end) .* C;
+        end
+
+        function OutData = StepRx(obj, InData)
+            if obj.isTransparent
+                OutData = InData;
+                return;
+            end
+
+            InData = InData(:);
+            OutData = InData;
+            first = min(obj.HeaderLength, length(InData));
+            N = length(InData) - first;
+            if N == 0
+                return;
+            end
+
+            C = obj.GetSequence(N);
+            OutData(first+1:end) = InData(first+1:end) .* conj(C);
+        end
+    end
+
+    methods (Access = private)
+        function C = GetSequence(obj, N)
+            if N <= length(obj.ScramblingSequence)
+                C = obj.ScramblingSequence(1:N);
+            else
+                C = obj.MakeSequence(N);
+            end
+            C = C(:);
+        end
+
+        function C = MakeSequence(obj, N)
+            % DVB-S2 PL scrambling sequence, ETSI EN 302 307-1, clause 5.5.4.
+            % Two 18th-order m-sequences form a family of Gold sequences.
+            P = obj.GoldPeriod;
+            idx = (0:N-1).';
+
+            % Generate the two 18th-order m-sequences over one Gold period.
+            x = zeros(P,1);
+            y = ones(P,1);
+            x(1) = 1;
+
+            for k = 1:(P-18)
+                x(k+18) = xor(x(k+7), x(k));
+                y(k+18) = xor(xor(y(k+10), y(k+7)), xor(y(k+5), y(k)));
+            end
+
+            % z is needed not only for N output symbols, but also for the
+            % 2^17-symbol offset used in the DVB-S2 construction.
+            zShift = 131072;
+            zIdx = (0:(N + zShift - 1)).';
+
+            xIdx = mod(zIdx + obj.ScramblingCodeIndex, P) + 1;
+            yIdx = mod(zIdx, P) + 1;
+            z = xor(x(xIdx), y(yIdx));
+
+            zShiftIdx = (1:N).' + zShift;
+            R = 2*double(z(zShiftIdx)) + double(z(1:N));
+            C = exp(1j*pi/2*R);
+        end
+    end
+end
