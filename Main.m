@@ -148,8 +148,8 @@ function Objs = LoopFun(inObjs, Ruler, WorkerNum)
                     Frame.TxModSymbols = Objs.Mapper.StepTx( ...
                         Frame.TxIntData);
                 % Генерирование сигнала
-                    Frame.TxSignal     = Objs.Sig.StepTx( ...
-                        Frame.TxModSymbols);
+                    Frame.TxPLFrame    = Objs.PLScrambler.StepTx(Frame.TxModSymbols);
+                    Frame.TxSignal     = Objs.Sig.StepTx(Frame.TxPLFrame);
 
             % Канал
                 [Frame.RxSignal, InstChannelParams] = Objs.Channel.Step(...
@@ -158,7 +158,8 @@ function Objs = LoopFun(inObjs, Ruler, WorkerNum)
             % Приёмник
                 % Обработка принятого сигнала - вычисление модуляционных
                 % символов
-                    Frame.RxModSymbols = Objs.Sig.StepRx(Frame.RxSignal);
+                    Frame.RxPLFrame    = Objs.Sig.StepRx(Frame.RxSignal);
+                Frame.RxModSymbols = Objs.PLScrambler.StepRx(Frame.RxPLFrame);
                 % Демодуляция
                     Frame.RxIntData    = Objs.Mapper.StepRx( ...
                         Frame.RxModSymbols, InstChannelParams);
