@@ -1,7 +1,7 @@
 % =====================================
-% Results01 - DVB-S2
-% BCH + LDPC + Interleaver
-% 8PSK, Rate = 3/4
+% Results01 - DVB-S2, Команда 4
+% BCH + LDPC + Interleaver + 8PSK
+% RLDPC = 3/4, pilots = ON
 % =====================================
 Source.NumBitsPerFrame = 1496*32;
 
@@ -26,6 +26,19 @@ Mapper.ModulationOrder = 8;
 Mapper.DecisionMethod = 'Approximate log-likelihood ratio';
 Mapper.HasPilots = true;
 
+% =====================================
+% Человек 4
+% =====================================
+PLScrambler.isTransparent = false;
+PLScrambler.ScramblingCodeIndex = 0;  % n = 0
+PLScrambler.HeaderLength = 90;         % PLHEADER не скремблируется
+PLScrambler.MaxSequenceLength = 66420;
+
+RRCFilter.isTransparent = false;
+RRCFilter.RolloffFactor = 0.35;
+RRCFilter.FilterSpanInSymbols = 10;    % Ta = 10T
+RRCFilter.SamplesPerSymbol = 4;
+
 Sig.isTransparent = false;
 
 % Channel
@@ -38,10 +51,9 @@ BER.h2dBInitStep = 0.5;
 BER.h2dBMaxStep  = 1.0;
 BER.h2dBMinStep  = 0.1;
 
-% Чтобы кривая была полной, а не одной точкой:
-BER.MinBER         = 1e-6;   % было 1e-4
-BER.MinFER         = 1e-3;   % было 1
-BER.MaxNumTrBits   = 1e9;    % было 1e8
+BER.MinBER         = 1e-6;
+BER.MinFER         = 1e-3;
+BER.MaxNumTrBits   = 1e9;
 BER.MinNumTrFrames = 500;
 BER.MinNumErFrames = 100;
 BER.MinNumErBits   = 500;
